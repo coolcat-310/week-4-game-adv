@@ -11,6 +11,10 @@ img{
     text-align: center;
 }
 
+.currentEnemy{
+    border: dotted 2px red;
+}
+
 .hideMe{
     display:none;
 }

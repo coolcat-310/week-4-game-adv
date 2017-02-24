@@ -10,13 +10,13 @@ var crystals = {
         hp: 100,
         attack: 10,
         counter: 8,
-
     },
     mozzy:{
         name: "Mozzy",
         hp: 150,
         attack: 8,
         counter: 10,
+
     },
     tranzy:{
         name: "Tranzy",
@@ -35,7 +35,7 @@ var crystals = {
 var incAttack = 0;
 var player1;
 var player2;
-
+var winCount = 0;
 
 /* On hover of the center character div, run function. */
 $(".aboutMe").hover(function(){
@@ -45,10 +45,10 @@ $(".aboutMe").hover(function(){
         /* declare character.id to access object values. EXAMPLE = hovering over image of jack returns
          id of jack(as declared in html). vitalStats would equal the object of characters.jack*/
         var vitalStats = crystals[placeholder];
-        // if(DEBUG) {
-        //     console.log(placeholder);
-        //     console.log(vitalStats);
-        // }
+        if(DEBUG) {
+            console.log(placeholder);
+            console.log(vitalStats);
+        }
         /* because vitalStats is now a specific character from characters object, we can now access
          their name, health points, attack, and even counter attack if we chose to. The code below
          gets the name, HP, and attack and generates HTML containing it.*/
@@ -86,16 +86,94 @@ $(".aboutMe").on("click", function(){
         console.log(htmlBuild);
         $(".playerOne").html(htmlBuild);
     }
-    // else if /* player chosen, but not enemy */(currentEnemy === undefined && chosenCharacter !== undefined){
-    //     /* This part is nearly identical to the above */
-    //     var placeholder = this.id;
-    //     currentEnemy = characters[placeholder];
-    //     console.log(currentEnemy); /* You can cheat and view their counter-attack values. Cheater! */
-    //     $(this).addClass("hideMe");
-    //     $(this).removeClass("enemyCharacter"); /* no longer enemy character */
-    //     $(this).addClass("currentEnemy");  /* make current enemy instead */
-    //     htmlBuild = "<img src='assets/images/" + placeholder + ".jpg'" + ">" /* get image */
-    //     $(".enemyBox").html(htmlBuild); /* place image in enemy box on right */
-    //     $(".instructionalText").html("Let the battle begin!"); /* update instructions */
-    // }
+    else if (player1 != undefined && player2 === undefined){
+        var placeholder = this.id;
+        player2 = crystals[placeholder];
+        $(this).addClass("hideMe");
+        $(this).addClass("currentEnemy");
+        htmlBuild = "<img class=img-circle src= assests/images/" + placeholder + ".jpg" + ">";
+        $(".playerTwo").html(htmlBuild);
+
+        if(DEBUG) {
+            console.log(player2);
+        }
+    }
+
 });
+
+function updateStats(){
+    var resultsHtml =  player1.name + " has attacked " + player2.name + " for " + player1.attack + " Health Points!<br>" +
+        player2.name + " has counter-attacked " + player1.name + " for " + player2.counter + " Health Points!<br>" +
+        player1.name + " has " + player1.hp + " Health Points remaining!<br>" +
+        player2.name + " has " + player2.hp + " Health Points remaining!";
+
+    $(".stats").html(resultsHtml);
+};
+
+function erasePlayer2(){
+    // alert("You've defeated " + currentEnemy.name);
+    player2=undefined; /* so you can add new enemy */
+    $(".playerTwo").html(""); /* clear dead opponent's photo */
+    $(".stats").html(""); /* clear text with attack status */
+    $(".instructionalText").html("Now choose your next opponent!");
+    winCount++; /* for the Easter egg */
+};
+
+function gameOver(){
+    alert("You lost!!!");
+    reset();
+}
+
+function fightOutcome(){
+    /* if enemy has less than 1 health, and you have more than 0 */
+    if(player1.hp > 0 && player2.hp < 1){
+        console.log(player2.name + ' is defeated.');
+        erasePlayer2();
+    }else if(player2.hp > 0 && player1.hp < 1){
+        console.log(player1.name + ' is defeated');
+        gameOver();
+    }
+    // if(currentEnemy.hp < 1 && chosenCharacter.hp > 0){
+    //     deadEnemy(); /* enemy dies */
+    // } else if(chosenCharacter.hp < 1)/*You have less than 1 HP? Too bad! */{
+    //     deadPlayer(); /* you die. Reset function is contained within deadPlayer function */
+    // }
+};
+
+
+$(".fightButton").on("click",function(){
+    /* make sure it only runs if both enemy and character are chosen */
+    if(player1 != undefined && player2 != undefined){
+        /* remove enemy health based on your character attack */
+        player2.hp -= player1.attack;
+        /* remove your health based on their counter attack */
+        // chosenCharacter.hp-=currentEnemy.counterAttack;
+        player1.hp -= player2.counter;
+        // /* run function to post results */
+        updateStats();
+        // /* increment attack based on global variable we declared earlier */
+        player1.attack += Math.ceil(Math.random() * 9);
+        // chosenCharacter.attack += attackPower;
+        // /* Are either of them dead? */
+        fightOutcome();
+        /* Are all three characters defeated? */
+        if(DEBUG){
+            console.log(player2.hp);
+            console.log(player1.hp);
+            console.log('attack' + player1.attack)
+        }
+    };
+});
+
+function reset() {
+    // Reset the game
+    winCount = 0;
+    player1= undefined;
+    player2= undefined;
+    $(".playerOne").html = "";
+    $(".playerTwo").html = "";
+
+
+
+
+}
