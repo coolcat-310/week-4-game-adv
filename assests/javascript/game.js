@@ -3,6 +3,7 @@
  */
 
 var DEBUG = true;
+
 //Global Variables
 var crystals = {
     sazzy:{
@@ -37,38 +38,34 @@ var player1;
 var player2;
 var winCount = 0;
 
-/* On hover of the center character div, run function. */
-$(".aboutMe").hover(function(){
-        /* get ID of image */
-        var placeholder = this.id;
 
-        /* declare character.id to access object values. EXAMPLE = hovering over image of jack returns
-         id of jack(as declared in html). vitalStats would equal the object of characters.jack*/
-        var vitalStats = crystals[placeholder];
-        if(DEBUG) {
-            console.log(placeholder);
-            console.log(vitalStats);
-        }
-        /* because vitalStats is now a specific character from characters object, we can now access
-         their name, health points, attack, and even counter attack if we chose to. The code below
-         gets the name, HP, and attack and generates HTML containing it.*/
-        $("#intructions").html(vitalStats.name + " HP: " + vitalStats.hp + "  Attack: " + vitalStats.attack + " CounterAttack: " + vitalStats.counter);
-    }, /* above half runs on mouse enter hover area,
-     here on down runs on mouse exit hover area */
-    function(){
-        if(player1===undefined){
-            $("#intructions").html("Choose your Character!");
-        } else if (player1!==undefined && player2===undefined){
-            $("#intructions").html("<p>Choose your Adversary wisely!</p>");
-        } else {
-            $("#intructions").html("Let the battle begin!");
-        }
+$(".aboutMe").hover(function(){
+    /* The Event listener takes effect when the cursor is place over the crystal images
+    *  The #instructions displays stats about each crystal and guides user towards the next step.*/
+
+    var placeholder = this.id;
+    var vitalStats = crystals[placeholder];
+    if(DEBUG) {
+        console.log(placeholder);
+        console.log(vitalStats);
     }
+    $("#intructions").html(vitalStats.name + " HP: " + vitalStats.hp + "  Attack: " + vitalStats.attack + " CounterAttack: " + vitalStats.counter);
+        }, function(){
+            if(player1===undefined){
+                $("#intructions").html("Choose your Character!");
+                } else if (player1!==undefined && player2===undefined){
+                $("#intructions").html("<p>Choose your Adversary wisely!</p>");
+                } else {
+                $("#intructions").html("Let the battle begin!");
+                }
+        }
 );
 
 $(".aboutMe").on("click", function(){
+    /* The Event listener takes effect when the cursor clicks on one of the crystal.
+    *  The function assigns player1 and player2. */
+
     if(player1 === undefined){
-        /* same process as hover function to choose ID of clicked and select matching object */
         var placeholder = this.id;
         player1 = crystals[placeholder];
         incAttack = player1.attack;
@@ -102,6 +99,8 @@ $(".aboutMe").on("click", function(){
 });
 
 function updateStats(){
+    /* Builds a string about the current health status of both player1 & player2 */
+
     var resultsHtml =  player1.name + " has attacked " + player2.name + " for " + player1.attack + " Health Points!<br>" +
         player2.name + " has counter-attacked " + player1.name + " for " + player2.counter + " Health Points!<br>" +
         player1.name + " has " + player1.hp + " Health Points remaining!<br>" +
@@ -111,57 +110,57 @@ function updateStats(){
 };
 
 function erasePlayer2(){
-    // alert("You've defeated " + currentEnemy.name);
-    player2=undefined; /* so you can add new enemy */
-    $(".playerTwo").html(""); /* clear dead opponent's photo */
-    $(".stats").html(""); /* clear text with attack status */
+    /* When player2 is defeated, then the contents in #playerTwo is erase*/
+    player2=undefined;
+    $(".playerTwo").html("");
+    $(".stats").html("");
     $(".instructionalText").html("Now choose your next opponent!");
-    winCount++; /* for the Easter egg */
+    winCount++;
 };
 
 function gameOver(){
-    alert("You lost!!!");
+    /* When player1 is defeated, then the game is reset */
+    alert("You lost.\nPlease Try Again");
     reset();
 }
 
 function fightOutcome(){
-    /* if enemy has less than 1 health, and you have more than 0 */
+    /* fightOutcome determine whether player1 or player2 is defeated */
+
     if(player1.hp > 0 && player2.hp < 1){
-        console.log(player2.name + ' is defeated.');
+        if (DEBUG){console.log(player2.name + ' is defeated.');}
         erasePlayer2();
-    }else if(player2.hp > 0 && player1.hp < 1){
-        console.log(player1.name + ' is defeated');
+    }else if(player1.hp < 1){
+        if (DEBUG){console.log(player1.name + ' is defeated');}
         gameOver();
     }
-    // if(currentEnemy.hp < 1 && chosenCharacter.hp > 0){
-    //     deadEnemy(); /* enemy dies */
-    // } else if(chosenCharacter.hp < 1)/*You have less than 1 HP? Too bad! */{
-    //     deadPlayer(); /* you die. Reset function is contained within deadPlayer function */
-    // }
 };
 
+function isWinner(){
+    /* isWinner determines whether player1 is a winner only after he beats all other crystals */
+    if(winCount === 3){
+        alert(player1.name + " is a Winner!!!!");
+        reset();
+    }
+}
 
 $(".fightButton").on("click",function(){
-    /* make sure it only runs if both enemy and character are chosen */
+    /* fightBUTTON make sure that a fight can begin only if both players are chosen. */
+
     if(player1 != undefined && player2 != undefined){
-        /* remove enemy health based on your character attack */
         player2.hp -= player1.attack;
-        /* remove your health based on their counter attack */
-        // chosenCharacter.hp-=currentEnemy.counterAttack;
         player1.hp -= player2.counter;
-        // /* run function to post results */
         updateStats();
-        // /* increment attack based on global variable we declared earlier */
-        player1.attack += Math.ceil(Math.random() * 9);
-        // chosenCharacter.attack += attackPower;
-        // /* Are either of them dead? */
+        player1.attack += Math.floor(Math.random() * 3);
         fightOutcome();
-        /* Are all three characters defeated? */
+        isWinner();
+
         if(DEBUG){
             console.log(player2.hp);
             console.log(player1.hp);
             console.log('attack' + player1.attack)
         }
+
     };
 });
 
@@ -170,10 +169,42 @@ function reset() {
     winCount = 0;
     player1= undefined;
     player2= undefined;
-    $(".playerOne").html = "";
-    $(".playerTwo").html = "";
+    $(".playerOne").html("");
+    $(".playerTwo").html("");
+    $(".aboutMe").removeClass("hideMe");
+    $(".aboutMe").removeClass("currentEnemy");
+    $(".aboutMe").removeClass("player1");
+    $(".aboutMe").addClass("playableCharacter");
+    htmlBuild;
+    crystals = {
+        sazzy:{
+            name: "Sazzy",
+            hp: 100,
+            attack: 10,
+            counter: 8,
+        },
+        mozzy:{
+            name: "Mozzy",
+            hp: 150,
+            attack: 8,
+            counter: 10,
 
-
-
-
+        },
+        tranzy:{
+            name: "Tranzy",
+            hp: 75,
+            attack: 16,
+            counter: 14,
+        },
+        opazy:{
+            name: "Opazy",
+            hp: 80,
+            attack: 9,
+            counter: 3,
+        }
+    };
 }
+
+$(".resetButton").on("click",function(){
+    reset();
+});
