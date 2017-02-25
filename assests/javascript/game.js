@@ -171,7 +171,8 @@ function reset() {
     player2= undefined;
     $(".playerOne").html("");
     $(".playerTwo").html("");
-    $("#intructions").html("Choose your Crystal")
+    $("#intructions").html("Choose your Crystal");
+    $(".stats").html("");
     $(".aboutMe").removeClass("hideMe");
     $(".aboutMe").removeClass("currentEnemy");
     $(".aboutMe").removeClass("player1");
